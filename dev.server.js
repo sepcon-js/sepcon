@@ -9,17 +9,7 @@ import open from 'open';
 
 const compiler = webpack(config);
 
-const server = new WebpackDevServer(compiler, {
-    hot: true
-});
-
-//server.use(require('webpack-dev-middleware')(compiler, {
-//    noInfo: true,
-//    publicPath: config.output.publicPath
-//}));
-//
-//server.use(require('webpack-hot-middleware')(compiler));
-
+const server = new WebpackDevServer(compiler);
 
 server.listen(config.devServer.port);
 

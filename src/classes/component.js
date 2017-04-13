@@ -39,13 +39,15 @@ export default class Component {
 
         this.scoped.events.forEach((evObj)=> {
             //getting the target - selector or the whole element
-            const _target = evObj.selector ? this.scoped.element.querySelector(evObj.selector) : this.scoped.element;
+            const _target = evObj.selector ? this.scoped.element.querySelectorAll(evObj.selector) : this.scoped.element;
             if(!this.validateEvents(_target, evObj, true)) {
                 return;
             }
             //storing callbacks in a map to keep reference for later unbinding on demand
             this._eventsCallbacks[evObj.selector + ':' + evObj.event + ':' + evObj.callback] = this.scoped[evObj.callback].bind(this.scoped);
-            _target.addEventListener(evObj.event, this._eventsCallbacks[evObj.selector + ':' + evObj.event + ':' + evObj.callback], false);
+            _target.forEach(trg => {
+                trg.addEventListener(evObj.event, this._eventsCallbacks[evObj.selector + ':' + evObj.event + ':' + evObj.callback], false);
+            });
         });
         this.scoped.isInitiatedEvents = true;
     }

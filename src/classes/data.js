@@ -9,11 +9,15 @@ export default class Data {
         if(def.extend) {
             definition = common.extend(def.extend.data, def.data);
         }
-        this.definition = def;
+        this.definition = common.clone(def);
         this.data = definition;
     }
     setProps(props) {
         props = common.formatValueForValidJSON(props);
+        return changes.setChanges(this.data, props, true);
+    }
+    resetProps() {
+        let props = common.formatValueForValidJSON(this.definition.data);
         return changes.setChanges(this.data, props, true);
     }
     /**
@@ -23,8 +27,13 @@ export default class Data {
      */
     getProps(props) {
         let map = {};
-        for(let i=0,e=props.length;i<e;i++){
-            map[props[i]] = typeof props[i] === 'object' ? this.getProp(props[i].key, props[i].index) : this.getProp(props[i]);
+        if(!props) {
+            map = common.clone(this.data);
+        }
+        else {
+            for (let i = 0, e = props.length; i < e; i++) {
+                map[props[i]] = typeof props[i] === 'object' ? this.getProp(props[i].key, props[i].index) : this.getProp(props[i]);
+            }
         }
         return map;
     }

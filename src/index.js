@@ -49,6 +49,7 @@ class SepConClass {
     createComponent(def) {
         create.call(this, def, 'component', this.root.components, this.root.classes.ComponentDefinition);
         return {
+            id: def.id,
             createTag: () => this.createTag(def.id)
         };
     }

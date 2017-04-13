@@ -26,9 +26,12 @@ export default {
 
     extend(base, extend) {
         let res = this.clone(base);
+        if(!res) {
+            res = {};
+        }
         for (let i in extend) {
-            if (base.hasOwnProperty(i)) {
-                if(typeof base[i] === 'object') {
+            if (res.hasOwnProperty(i)) {
+                if(typeof extend[i] === 'object') {
                     res[i] = this.extend(base[i], extend[i]);
                 }
                 else {

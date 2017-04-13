@@ -11,6 +11,7 @@ module.exports = {
         publicPath: '/',
         filename: '[name].js',
     },
+    devtool: 'source-map',
 
     devServer: {
         colors:true,

@@ -178,6 +178,9 @@ export default class ComponentState {
             }
         };
 
+        this.scoped.getProps = () => this.getProps();
+        this.scoped.getMethods = () => this.getMethods();
+
         this.scoped.router = this.root.router;
         this.scoped.execute = this.root.executeModifier.bind(this.root);
         this.scoped.id = component.scoped.id;

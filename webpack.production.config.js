@@ -3,7 +3,8 @@ const CompressionPlugin = require("compression-webpack-plugin");
 
 module.exports = {
     entry: {
-        sepcon: './src/index.js'
+        'sepcon': './src/index.js',
+        'sepcon.min': './src/index.js'
     },
     output: {
         path: __dirname+'/dist',
@@ -12,10 +13,13 @@ module.exports = {
         libraryTarget: 'umd',
         umdNamedDefine: true
     },
+    devtool: 'source-map',
     target: 'web',
     plugins: [
         new webpack.optimize.OccurenceOrderPlugin(),
         new webpack.optimize.UglifyJsPlugin({
+            include: /\.min\.js$/,
+            minimize: true,
             compress: {
                 warnings: false
             },
@@ -23,14 +27,10 @@ module.exports = {
                 comments: false,
             },
         }),
-        new webpack.BannerPlugin('   < SepCon />.JS    '+new Date().toString()+'\n'+
-            'Derived from the separation of concerns (SoC) design principle,\n' +
-            'influenced by Flux and MVVM architectures.\n' +
-            '\nContributed by Ron Rostovsky', { entryOnly: true }),
         new CompressionPlugin({
             asset: "[path].gz[query]",
             algorithm: "gzip",
-            test: /\.js$|\.html$/,
+            test: /\.min\.js$|\.html$/,
             threshold: 10240,
             minRatio: 0.8
         }),

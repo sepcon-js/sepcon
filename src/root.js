@@ -73,11 +73,11 @@ export default class Root {
     }
 
     /* application's global functionality */
-    executeModifier(modifier, id) {
+    executeModifier(modifier, key) {
         const originalArgs = [].slice.call(arguments);
         const passedArgs = originalArgs.slice(2);
-        if(this.modifiers[modifier] && this.modifiers[modifier].has(id)) {
-            this.modifiers[modifier].stack(id, passedArgs);
+        if(this.modifiers[modifier] && this.modifiers[modifier].has(key)) {
+            this.modifiers[modifier].stack(key, passedArgs);
         }
         //should execute after current runtime for cases of multiple changes of the same data
         Promise.resolve().then(()=>{

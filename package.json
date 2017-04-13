@@ -2,7 +2,7 @@
   "name": "sepcon",
   "version": "2.2.8",
   "description": "",
-  "main": "dist/sepcon.js",
+  "main": "dist/sepcon.min.js",
   "dependencies": {
     "babel-core": "^6.18.2",
     "babel-loader": "^6.2.9",
