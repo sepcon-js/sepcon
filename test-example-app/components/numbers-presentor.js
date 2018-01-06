@@ -12,20 +12,23 @@ const numberPresentor = SepCon.createComponent({
                 number: null,
             },
         },
-        change(changed) {
-            if (this.props.external.index === '1') {
-                console.log('do not render change for number index 1 - referenced value should still get updated');
-                return false;
+        lifecycle: {
+            change(changed) {
+                if (this.props.external.index === '1') {
+                    console.log('do not render change for number index 1 - referenced value should still get updated');
+                    return false;
+                }
             }
         }
     },
     view: {
-        render() {
-            const text = TextHolder.createTag()
-                .refProps({
-                    value: 'number'
-                });
-            return `
+        lifecycle: {
+            render() {
+                const text = TextHolder.createTag()
+                    .refProps({
+                        value: 'number'
+                    });
+                return `
                     <div class="sepcon sepcon-component">
                         ${this.props.index === '1' ? `<div class="redText">Do not re-render on change</div>` : ''}
                         Index: ${this.props.index} -
@@ -35,6 +38,7 @@ const numberPresentor = SepCon.createComponent({
                             ${text.render()}
                         </div>
                     </div>`;
+            }
         }
     }
 });
@@ -54,34 +58,37 @@ export default SepCon.createComponent({
                 }
             }
         },
-        change(changed) {
-            this.setProps({
-                changes: this.props.local.changes + 1
-            }, true);
-            if (changed.list && Object.keys(changed.list.newValue).length != Object.keys(changed.list.oldValue).length) {
-                return true;
+        lifecycle: {
+            change(changed) {
+                this.setProps({
+                    changes: this.props.local.changes + 1
+                }, true);
+                if (changed.list && Object.keys(changed.list.newValue).length != Object.keys(changed.list.oldValue).length) {
+                    return true;
+                }
+                return false;
             }
-            return false;
         }
     },
     view: {
-        render() {
-            const text = TextHolder.createTag()
-                .refProps({
-                    value: 'changes'
-                });
-            let numbers = [];
-            for (let index in this.props.list) {
-                numbers.push(numberPresentor.createTag()
-                    .id(index)
-                    .props({
-                        index
-                    })
+        lifecycle: {
+            render() {
+                const text = TextHolder.createTag()
                     .refProps({
-                        number: 'list.' + index
-                    }));
-            }
-            return `
+                        value: 'changes'
+                    });
+                let numbers = [];
+                for (let index in this.props.list) {
+                    numbers.push(numberPresentor.createTag()
+                        .id(index)
+                        .props({
+                            index
+                        })
+                        .refProps({
+                            number: 'list.' + index
+                        }));
+                }
+                return `
                     <div class="sepcon sepcon-container">
                         <div class="flex-container">
                             ${numbers.map((item)=>item.render()).join('')}
@@ -89,6 +96,7 @@ export default SepCon.createComponent({
                         <h5>Numbers data have been changed: </h5>
                         ${text.render()}
                     </div>`;
+            }
         }
     }
 });

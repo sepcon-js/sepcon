@@ -13,15 +13,19 @@ SepCon.createComponent({
                 }
             }
         },
-        mount() {
-            console.log('the decorator "mount"', this);
-            this.methods.local.debug.call(this);
+        lifecycle: {
+            mount() {
+                console.log('the decorator "mount"', this);
+                this.methods.local.debug.call(this);
+            }
         }
     },
     view: {
-        render() {
-            console.log('the decorator "render"', this);
-            this.debugComponent();
+        lifecycle: {
+            render() {
+                console.log('the decorator "render"', this);
+                this.debugComponent();
+            }
         },
         debugComponent() {
             console.log('the decorator "debugComponent', this);
@@ -70,21 +74,23 @@ export default SepCon.createComponent({
             {event: 'click', selector: 'div#dfg5e3dfg', handler: 'dfsgdfgs'},
             {event: 'click', selector: 'div', handler: 'dfsgdfgs'},
         ],
-        'render'() {
-            console.log('the actual component "render"', this);
-            this.methods.debug();
-            if (!this.props.currentPage) {
-                return '';
-            }
-            const title = TextHolder.createTag()
-                .props({value: this.props.currentPage.title});
-            const description = TextHolder.createTag()
-                .props({value: this.props.currentPage.description});
-            return `
+        lifecycle: {
+            render() {
+                console.log('the actual component "render"', this);
+                this.methods.debug();
+                if (!this.props.currentPage) {
+                    return '';
+                }
+                const title = TextHolder.createTag()
+                    .props({value: this.props.currentPage.title});
+                const description = TextHolder.createTag()
+                    .props({value: this.props.currentPage.description});
+                return `
                     <div class="sepcon sepcon-component">
                         ${title.render()}
                         ${description.render()}
                     </div>`;
+            }
         },
         debugComponent() {
             console.log('the actual component "debugComponent', this);

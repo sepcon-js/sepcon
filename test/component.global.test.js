@@ -83,28 +83,30 @@ describe('Component Global Segregation (+ Data & Modifier)', ()=> {
                         }
                     }
                 },
-                mount() {
-                    this.methods.global.set();
-                },
-                change(changed) {
-                    expect(changed).to.have.property('objProp1');
-                    expect(changed.objProp1).to.have.property('oldValue');
-                    expect(changed.objProp1).to.have.property('newValue');
-                    expect(changed.objProp1.oldValue).to.be.equal(1);
-                    expect(changed.objProp1.newValue).to.be.equal(5);
+                lifecycle: {
+                    mount() {
+                        this.methods.global.set();
+                    },
+                    change(changed) {
+                        expect(changed).to.have.property('objProp1');
+                        expect(changed.objProp1).to.have.property('oldValue');
+                        expect(changed.objProp1).to.have.property('newValue');
+                        expect(changed.objProp1.oldValue).to.be.equal(1);
+                        expect(changed.objProp1.newValue).to.be.equal(5);
 
-                    expect(changed).to.have.property('arrProp1');
-                    expect(changed.arrProp1).to.have.property('oldValue');
-                    expect(changed.arrProp1).to.have.property('newValue');
-                    expect(changed.arrProp1.oldValue).to.be.equal(1);
-                    expect(changed.arrProp1.newValue).to.have.property('prop1');
-                    expect(changed.arrProp1.newValue).to.have.property('prop2');
-                    expect(changed.arrProp1.newValue).to.have.property('prop3');
-                    expect(changed.arrProp1.newValue.prop1).to.be.equal(1);
-                    expect(changed.arrProp1.newValue.prop2).to.be.equal(2);
-                    expect(changed.arrProp1.newValue.prop3).to.be.equal(3);
+                        expect(changed).to.have.property('arrProp1');
+                        expect(changed.arrProp1).to.have.property('oldValue');
+                        expect(changed.arrProp1).to.have.property('newValue');
+                        expect(changed.arrProp1.oldValue).to.be.equal(1);
+                        expect(changed.arrProp1.newValue).to.have.property('prop1');
+                        expect(changed.arrProp1.newValue).to.have.property('prop2');
+                        expect(changed.arrProp1.newValue).to.have.property('prop3');
+                        expect(changed.arrProp1.newValue.prop1).to.be.equal(1);
+                        expect(changed.arrProp1.newValue.prop2).to.be.equal(2);
+                        expect(changed.arrProp1.newValue.prop3).to.be.equal(3);
 
-                    done();
+                        done();
+                    }
                 }
             }
         });
@@ -126,17 +128,19 @@ describe('Component Global Segregation (+ Data & Modifier)', ()=> {
                         }
                     }
                 },
-                mount() {
-                    this.methods.global.set();
-                },
-                change(changed) {
-                    expect(changed).to.have.property('objProp1');
-                    expect(changed.objProp1).to.have.property('oldValue');
-                    expect(changed.objProp1).to.have.property('newValue');
-                    expect(changed.objProp1.oldValue).to.be.equal(1);
-                    expect(changed.objProp1.newValue).to.be.equal(5);
+                lifecycle: {
+                    mount() {
+                        this.methods.global.set();
+                    },
+                    change(changed) {
+                        expect(changed).to.have.property('objProp1');
+                        expect(changed.objProp1).to.have.property('oldValue');
+                        expect(changed.objProp1).to.have.property('newValue');
+                        expect(changed.objProp1.oldValue).to.be.equal(1);
+                        expect(changed.objProp1.newValue).to.be.equal(5);
 
-                    done();
+                        done();
+                    }
                 }
             }
         });
@@ -152,16 +156,20 @@ describe('Component Global Segregation (+ Data & Modifier)', ()=> {
                         }
                     }
                 },
-                change() {
-                    return false;
+                lifecycle: {
+                    change() {
+                        return false;
+                    }
                 }
             },
             view: {
-                render() {
-                    return childComp.createTag()
-                        .refProps({
-                            objProp1: 'objProp1' + '.prop1'
-                        }).render();
+                lifecycle: {
+                    render() {
+                        return childComp.createTag()
+                            .refProps({
+                                objProp1: 'objProp1' + '.prop1'
+                            }).render();
+                    }
                 }
             }
         });
@@ -185,17 +193,19 @@ describe('Component Global Segregation (+ Data & Modifier)', ()=> {
                         }
                     }
                 },
-                mount() {
-                    this.methods.global.set();
-                },
-                change(changed) {
-                    expect(changed).to.have.property('objProp1');
-                    expect(changed.objProp1).to.have.property('oldValue');
-                    expect(changed.objProp1).to.have.property('newValue');
-                    expect(changed.objProp1.oldValue).to.be.equal(1);
-                    expect(changed.objProp1.newValue).to.be.equal(5);
+                lifecycle: {
+                    mount() {
+                        this.methods.global.set();
+                    },
+                    change(changed) {
+                        expect(changed).to.have.property('objProp1');
+                        expect(changed.objProp1).to.have.property('oldValue');
+                        expect(changed.objProp1).to.have.property('newValue');
+                        expect(changed.objProp1.oldValue).to.be.equal(1);
+                        expect(changed.objProp1.newValue).to.be.equal(5);
 
-                    done();
+                        done();
+                    }
                 }
             }
         });
@@ -203,16 +213,20 @@ describe('Component Global Segregation (+ Data & Modifier)', ()=> {
             id: 'child' + testNum,
         }, {
             state: {
-                change() {
-                    return false;
+                lifecycle: {
+                    change() {
+                        return false;
+                    }
                 }
             },
             view: {
-                render() {
-                    return grandChildComp.createTag()
-                        .refProps({
-                            objProp1: 'objProp1' + '.prop1'
-                        }).render();
+                lifecycle: {
+                    render() {
+                        return grandChildComp.createTag()
+                            .refProps({
+                                objProp1: 'objProp1' + '.prop1'
+                            }).render();
+                    }
                 }
             }
         });
@@ -228,16 +242,20 @@ describe('Component Global Segregation (+ Data & Modifier)', ()=> {
                         }
                     }
                 },
-                change() {
-                    return false;
+                lifecycle: {
+                    change() {
+                        return false;
+                    }
                 }
             },
             view: {
-                render() {
-                    return childComp.createTag()
-                        .refProps({
-                            objProp1: 'objProp1' + '.object'
-                        }).render();
+                lifecycle: {
+                    render() {
+                        return childComp.createTag()
+                            .refProps({
+                                objProp1: 'objProp1' + '.object'
+                            }).render();
+                    }
                 }
             }
         });
@@ -272,23 +290,25 @@ describe('Component Global Segregation (+ Data & Modifier)', ()=> {
                         }
                     }
                 },
-                mount() {
-                    this.setGlobalProps({
-                        test1: {
-                            data: 'globalProps',
-                            key: 'object'
-                        }
-                    });
-                    this.methods.global.change();
-                },
-                change(changed) {
-                    console.log(changed);
-                    expect(changed).to.have.property('test1');
-                    expect(changed).to.have.property('test2');
-                    expect(changed.test1.newValue).to.have.property('prop3');
-                    expect(changed.test1.newValue).to.have.property('object');
-                    expect(changed.test2.newValue).to.be.equal(1);
-                    done();
+                lifecycle: {
+                    mount() {
+                        this.setGlobalProps({
+                            test1: {
+                                data: 'globalProps',
+                                key: 'object'
+                            }
+                        });
+                        this.methods.global.change();
+                    },
+                    change(changed) {
+                        console.log(changed);
+                        expect(changed).to.have.property('test1');
+                        expect(changed).to.have.property('test2');
+                        expect(changed.test1.newValue).to.have.property('prop3');
+                        expect(changed.test1.newValue).to.have.property('object');
+                        expect(changed.test2.newValue).to.be.equal(1);
+                        done();
+                    }
                 }
             }
         });
@@ -315,23 +335,25 @@ describe('Component Global Segregation (+ Data & Modifier)', ()=> {
                         }
                     }
                 },
-                mount() {
-                    this.setGlobalMethods({
-                        change: {
-                            modifier: 'globalMethods',
-                            key: 'setMainObject'
-                        }
-                    });
-                    this.methods.global.change();
-                },
-                change(changed) {
-                    console.log(changed);
-                    expect(changed).to.have.property('test1');
-                    expect(changed).to.have.property('test2');
-                    expect(changed.test1.newValue).to.have.property('prop3');
-                    expect(changed.test1.newValue).to.have.property('object');
-                    expect(changed.test2.newValue).to.be.equal(1);
-                    done();
+                lifecycle: {
+                    mount() {
+                        this.setGlobalMethods({
+                            change: {
+                                modifier: 'globalMethods',
+                                key: 'setMainObject'
+                            }
+                        });
+                        this.methods.global.change();
+                    },
+                    change(changed) {
+                        console.log(changed);
+                        expect(changed).to.have.property('test1');
+                        expect(changed).to.have.property('test2');
+                        expect(changed.test1.newValue).to.have.property('prop3');
+                        expect(changed.test1.newValue).to.have.property('object');
+                        expect(changed.test2.newValue).to.be.equal(1);
+                        done();
+                    }
                 }
             }
         });

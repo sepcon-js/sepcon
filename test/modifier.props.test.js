@@ -63,15 +63,17 @@ describe('Modifier Properties', ()=> {
                     key: 'number'
                 }
             },
-            change(changed) {
-                expect(changed).to.have.property('globals2number');
-                expect(changed.globals2number.newValue).to.be.equal(7);
-                expect(changed.globals2number.oldValue).to.be.equal(5);
-                done();
-            },
-            mount() {
-                //this.modify('globals', 'updateNumber', 7);
-                scope.modifier('globals').updateNumber(7);
+            lifecycle: {
+                change(changed) {
+                    expect(changed).to.have.property('globals2number');
+                    expect(changed.globals2number.newValue).to.be.equal(7);
+                    expect(changed.globals2number.oldValue).to.be.equal(5);
+                    done();
+                },
+                mount() {
+                    //this.modify('globals', 'updateNumber', 7);
+                    scope.modifier('globals').updateNumber(7);
+                }
             }
         });
     });
@@ -90,15 +92,17 @@ describe('Modifier Properties', ()=> {
                     key: 'number'
                 }
             },
-            change(changed) {
-                expect(changed).to.have.property('globals_number');
-                expect(changed).to.have.property('globals2_number');
-                expect(changed.globals_number.newValue).to.be.equal(1);
-                expect(changed.globals2_number.newValue).to.be.equal(1);
-                done();
-            },
-            mount() {
-                scope.modifier('globals').updateTwoDatas();
+            lifecycle: {
+                change(changed) {
+                    expect(changed).to.have.property('globals_number');
+                    expect(changed).to.have.property('globals2_number');
+                    expect(changed.globals_number.newValue).to.be.equal(1);
+                    expect(changed.globals2_number.newValue).to.be.equal(1);
+                    done();
+                },
+                mount() {
+                    scope.modifier('globals').updateTwoDatas();
+                }
             }
         });
     });

@@ -8,8 +8,10 @@ describe('Service Requests', ()=> {
     scope.createProvider({
         id: 'testProvider',
     }, {
-        mount() {
-            console.log('mount provider');
+        lifecycle: {
+            mount() {
+                console.log('mount provider');
+            }
         }
     });
 
@@ -85,8 +87,13 @@ describe('Service Requests', ()=> {
         scope.createProvider({
             id: 'testProvider' + testNum,
         }, {
-            'pre:mount'() {
-                this.someProp = 100;
+            lifecycle: {
+                pre: {
+                    mount() {
+                        this.someProp = 100;
+
+                    }
+                }
             }
         });
         scope.createService({

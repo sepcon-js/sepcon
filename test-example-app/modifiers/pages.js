@@ -22,7 +22,9 @@ export default SepCon.createModifier({
             }
         }
     ],
-    mount() {
-        console.log('mount modifier');
+    lifecycle: {
+        mount() {
+            console.log('mount modifier');
+        }
     }
 });

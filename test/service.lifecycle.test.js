@@ -19,17 +19,25 @@ describe('Service Lifecycle', () => {
                 testArgs(resolve, reject) {
                 }
             },
-            'pre:request'() {
-                expect(count).to.be.equal(0);
-                count++;
-            },
-            request() {
-                expect(count).to.be.equal(1);
-                count++;
-            },
-            'post:request'() {
-                expect(count).to.be.equal(2);
-                done();
+            lifecycle: {
+                pre: {
+                    request() {
+                        expect(count).to.be.equal(0);
+                        count++;
+                    }
+                },
+                on: {
+                    request() {
+                        expect(count).to.be.equal(1);
+                        count++;
+                    }
+                },
+                post: {
+                    request() {
+                        expect(count).to.be.equal(2);
+                        done();
+                    }
+                }
             }
         });
 
@@ -43,11 +51,13 @@ describe('Service Lifecycle', () => {
                 someRequest(resolve, reject) {
                 }
             },
-            'pre:request'(name, args) {
-                expect(name).to.be.equal('someRequest');
-                expect(args).to.be.an('array');
-                expect(args[0]).to.be.equal(5);
-                done();
+            lifecycle: {
+                request(name, args) {
+                    expect(name).to.be.equal('someRequest');
+                    expect(args).to.be.an('array');
+                    expect(args[0]).to.be.equal(5);
+                    done();
+                }
             }
         });
         scope.service('test' + testNum).requests.someRequest(5);
@@ -69,10 +79,14 @@ describe('Service Lifecycle', () => {
                     resolve('ok don\'t hurt me');
                 }
             },
-            'pre:request'(name) {
-                wentThroughLifecycle = true;
-                if (name === 'giveMeNow') {
-                    return false;
+            lifecycle: {
+                pre: {
+                    request(name) {
+                        wentThroughLifecycle = true;
+                        if (name === 'giveMeNow') {
+                            return false;
+                        }
+                    }
                 }
             }
         });
@@ -94,9 +108,13 @@ describe('Service Lifecycle', () => {
                     this.channels.testArgs();
                 }
             },
-            'pre:channel'() {
-                setTimeout(() => isOk && done(), 100);
-                return false;
+            lifecycle: {
+                pre: {
+                    channel() {
+                        setTimeout(() => isOk && done(), 100);
+                        return false;
+                    }
+                }
             }
         });
 

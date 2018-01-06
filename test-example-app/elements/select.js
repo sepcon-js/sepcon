@@ -20,18 +20,20 @@ export default SepCon.createComponent({
         events: [
             {event: 'change', selector: 'select', callback: 'handleChange'}
         ],
-        'render'() {
-            let options = [];
-            for (let i = 0, e = this.props.options.length; i < e; i++) {
-                const option = this.props.options[i];
-                const isSelected = this.props.selected === option.value ? 'selected="selected"' : '';
-                options.push(`<option ${isSelected} value="${option.value}">${option.label}</option>`);
-            }
-            return `<div class="sepcon sepcon-element">
+        lifecycle: {
+            render() {
+                let options = [];
+                for (let i = 0, e = this.props.options.length; i < e; i++) {
+                    const option = this.props.options[i];
+                    const isSelected = this.props.selected === option.value ? 'selected="selected"' : '';
+                    options.push(`<option ${isSelected} value="${option.value}">${option.label}</option>`);
+                }
+                return `<div class="sepcon sepcon-element">
                     <select name="${this.props.name}">
                         ${options.join('')}
                     </select>
                 </div>`;
+            },
         },
         handleChange(e) {
             this.methods.onchange(e.target.value);

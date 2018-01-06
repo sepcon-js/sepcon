@@ -10,8 +10,12 @@ describe('Component Integration', ()=>{
         },
         {
             view: {
-                render: function () {
-                    return '<div>Test</div>';
+                lifecycle: {
+                    on: {
+                        render: function () {
+                            return '<div>Test</div>';
+                        }
+                    }
                 }
             }
         }

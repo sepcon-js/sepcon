@@ -57,8 +57,10 @@ describe('Modifier Extension', ()=> {
                         }
                     }
                 },
-                mount() {
-                    this.methods.global.updateNum();
+                lifecycle: {
+                    mount() {
+                        this.methods.global.updateNum();
+                    }
                 }
             }
         });
@@ -116,9 +118,11 @@ describe('Modifier Extension', ()=> {
                         }
                     }
                 },
-                mount() {
-                    this.methods.global.setNum();
-                    this.methods.global.resetNum();
+                lifecycle: {
+                    mount() {
+                        this.methods.global.setNum();
+                        this.methods.global.resetNum();
+                    }
                 }
             }
         });

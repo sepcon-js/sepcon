@@ -13,17 +13,19 @@ export default SepCon.createModifier({
             this.setProps('numbers', {numbers});
         },
     },
-    mount() {
-        setTimeout(()=> {
-            this.methods.init();
-            setTimeout(()=> {
-                //setInterval(()=>{
-                this.methods.updateOneNumber(1, Math.round(Math.random() * 1000));
-                //}, 100);
-                setTimeout(()=> {
-                    this.methods.updateOneNumber('B', Math.round(Math.random() * 1000));
-                }, 5000);
+    lifecycle: {
+        mount() {
+            setTimeout(() => {
+                this.methods.init();
+                setTimeout(() => {
+                    //setInterval(()=>{
+                    this.methods.updateOneNumber(1, Math.round(Math.random() * 1000));
+                    //}, 100);
+                    setTimeout(() => {
+                        this.methods.updateOneNumber('B', Math.round(Math.random() * 1000));
+                    }, 5000);
+                }, 500);
             }, 500);
-        }, 500);
+        }
     }
 });

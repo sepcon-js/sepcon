@@ -44,9 +44,22 @@ export default class {
                     break;
             }
             //let target = sequenceStep.target === 'state' ? this.state.scoped : this.component.scoped;
-            const actionHook = common.hookString(hook, sequenceStep.action);
-            if(target[actionHook]) {
-                const res = target[actionHook].apply(target, params);
+            // const actionHook = common.hookString(hook, sequenceStep.action);
+            const hasLifecycle = !!target.lifecycle;
+            let action = false;
+
+            if(hasLifecycle) {
+                const hookKey = hook || 'on';
+                const hasHook = !!target.lifecycle[hookKey];
+                if(hasHook) {
+                    action = target.lifecycle[hookKey][sequenceStep.action];
+                }
+                if(!action && !hook) {
+                    action = target.lifecycle[sequenceStep.action]
+                }
+            }
+            if(action) {
+                const res = action.apply(target, params);
                 if(res === false) {
                     return false;
                 }

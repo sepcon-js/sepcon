@@ -54,22 +54,24 @@ export default SepCon.createComponent({
                 }
             }
         },
-        mount() {
-            this.updateProps();
-        },
-        change(changed) {
-            if (this.props.local.isFocused) {
-                if (changed.value) {
-                    this.methods.global.update();
+        lifecycle: {
+            mount() {
+                this.updateProps();
+            },
+            change(changed) {
+                if (this.props.local.isFocused) {
+                    if (changed.value) {
+                        this.methods.global.update();
+                    }
+                    if (changed.listForChange && Object.keys(this.props.global.listForChange).length > this.props.local.indexes.length) {
+                        this.updateProps();
+                        return true;
+                    }
+                    return false;
                 }
-                if (changed.listForChange && Object.keys(this.props.global.listForChange).length > this.props.local.indexes.length) {
-                    this.updateProps();
-                    return true;
-                }
-                return false;
+                this.updateProps();
+                return true;
             }
-            this.updateProps();
-            return true;
         },
         updateProps() {
             if (!Object.keys(this.props.global.listForChange).length) return;
@@ -92,53 +94,59 @@ export default SepCon.createComponent({
         }
     },
     view: {
-        'render'() {
-            let indexOptions = [];
-            for (let i = 0, e = this.props.indexes.length; i < e; i++) {
-                indexOptions[i] = {
-                    value: this.props.indexes[i],
-                    label: this.props.indexes[i],
-                };
-            }
-            const select = Select.createTag()
-                .props({
-                    name: 'changeIndex',
-                    options: indexOptions,
-                    selected: this.props.selected,
-                })
-                .refMethods({
-                    onchange: 'setNewIndex',
-                });
+        lifecycle: {
+            on: {
+                render() {
+                    let indexOptions = [];
+                    for (let i = 0, e = this.props.indexes.length; i < e; i++) {
+                        indexOptions[i] = {
+                            value: this.props.indexes[i],
+                            label: this.props.indexes[i],
+                        };
+                    }
+                    const select = Select.createTag()
+                        .props({
+                            name: 'changeIndex',
+                            options: indexOptions,
+                            selected: this.props.selected,
+                        })
+                        .refMethods({
+                            onchange: 'setNewIndex',
+                        });
 
-            const text = TextInput.createTag()
-                .props({
-                    name: 'changeNumber',
-                    value: this.props.value,
-                })
-                .refMethods({
-                    onchange: 'setNewValue',
-                    onfocus: 'textIsFocused',
-                    onblur: 'textIsNotFocused',
-                });
+                    const text = TextInput.createTag()
+                        .props({
+                            name: 'changeNumber',
+                            value: this.props.value,
+                        })
+                        .refMethods({
+                            onchange: 'setNewValue',
+                            onfocus: 'textIsFocused',
+                            onblur: 'textIsNotFocused',
+                        });
 
-            const button = DescribedButton.createTag()
-                .props({
-                    label: 'Reset Number ' + this.props.selected,
-                })
-                .refMethods({
-                    onclick: 'resetNumber',
-                });
+                    const button = DescribedButton.createTag()
+                        .props({
+                            label: 'Reset Number ' + this.props.selected,
+                        })
+                        .refMethods({
+                            onclick: 'resetNumber',
+                        });
 
-            return `
+                    return `
                     <div class="sepcon sepcon-component">
                         ${select.render()}
                         ${text.render()}
                         ${button.render()}
                     </div>`;
-        },
-        'post:render'(changed) {
-            if (changed && changed.selected) {
-                this.element.querySelector('input[name="changeNumber"]').focus();
+                }
+            },
+            post: {
+                render(changed) {
+                    if (changed && changed.selected) {
+                        this.element.querySelector('input[name="changeNumber"]').focus();
+                    }
+                }
             }
         }
     }

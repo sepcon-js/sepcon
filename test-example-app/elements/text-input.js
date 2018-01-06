@@ -29,14 +29,16 @@ export default SepCon.createComponent({
                 }
             },
         },
-        mount() {
-            if (this.props.external.value) {
-                this.updateCurrentValueWithExternal();
-            }
-        },
-        change(changed) {
-            if (changed.value) {
-                this.updateCurrentValueWithExternal();
+        lifecycle: {
+            mount() {
+                if (this.props.external.value) {
+                    this.updateCurrentValueWithExternal();
+                }
+            },
+            change(changed) {
+                if (changed.value) {
+                    this.updateCurrentValueWithExternal();
+                }
             }
         },
         updateCurrentValueWithExternal() {
@@ -49,10 +51,12 @@ export default SepCon.createComponent({
             {event: 'focus', selector: 'input', callback: 'handleFocus'},
             {event: 'blur', selector: 'input', callback: 'handleBlur'},
         ],
-        render() {
-            return `<div class="sepcon sepcon-element">
+        lifecycle: {
+            render() {
+                return `<div class="sepcon sepcon-element">
                 <input name="${this.props.name}" value="${this.props.currentValue}"/>
             </div>`;
+            }
         },
         handleChange(e) {
             this.methods.onchange(e.target.value);

@@ -7,10 +7,11 @@ export default SepCon.createComponent({
     id: 'numbers-container',
 }, {
     view: {
-        render() {
-            const oneNumberChanger = OneNumberChanger.createTag();
-            const numbersPresentor = NumbersPresentor.createTag();
-            return `<div class="sepcon sepcon-container flex-container">
+        lifecycle: {
+            render() {
+                const oneNumberChanger = OneNumberChanger.createTag();
+                const numbersPresentor = NumbersPresentor.createTag();
+                return `<div class="sepcon sepcon-container flex-container">
                     <div>
                         ${numbersPresentor.render()}
                     </div>
@@ -18,6 +19,7 @@ export default SepCon.createComponent({
                         ${oneNumberChanger.render()}
                     </div>
                 </div>`;
+            }
         }
     }
 });

@@ -9,10 +9,12 @@ export default SepCon.createComponent({
         }
     },
     view: {
-        render() {
-            return `<div class="sepcon sepcon-element">
+        lifecycle: {
+            render() {
+                return `<div class="sepcon sepcon-element">
                     ${this.props.value}
                 </div>`;
+            }
         }
     }
 });

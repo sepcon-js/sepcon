@@ -19,31 +19,33 @@ export default SepCon.createComponent({
         }
     },
     view: {
-        render() {
-            if (!this.props.page) {
-                return false;
-            }
-            let header = Header.createTag();
-            let navbar = Navbar.createTag();
-            let html = '';
-            switch (this.props.page.id) {
-                case 'home':
-                    html = `<div class="sepcon sepcon-container">
+        lifecycle: {
+            render() {
+                if (!this.props.page) {
+                    return false;
+                }
+                let header = Header.createTag();
+                let navbar = Navbar.createTag();
+                let html = '';
+                switch (this.props.page.id) {
+                    case 'home':
+                        html = `<div class="sepcon sepcon-container">
                     ${NumbersModifierContainer.createTag().render()}
                 </div>`;
-                    break;
-                case 'flux':
-                    html = `<div class="sepcon sepcon-container">
+                        break;
+                    case 'flux':
+                        html = `<div class="sepcon sepcon-container">
                     ${NumbersContainer.createTag().render()}
                 </div>`;
-                    break;
-                case 'externals':
-                    html = `<div class="sepcon sepcon-container">
+                        break;
+                    case 'externals':
+                        html = `<div class="sepcon sepcon-container">
                     ${PassingPropsContainer.createTag().render()}
                 </div>`;
-                    break;
+                        break;
+                }
+                return `${header.render()}${navbar.render()}${html}`;
             }
-            return `${header.render()}${navbar.render()}${html}`;
         },
         descendantChange(component) {
             console.log('layout descendantChange', component);

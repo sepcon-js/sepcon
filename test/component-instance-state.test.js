@@ -2,7 +2,7 @@ import SepCon from '../src/index';
 
 let expect = chai.expect;
 
-describe('Component Unit', ()=> {
+describe('Component Unit', () => {
     let testNum = 0;
     const scope = SepCon.createScope();
     beforeEach(function () {
@@ -13,10 +13,12 @@ describe('Component Unit', ()=> {
             id: 'test-' + testNum + '-child',
         }, {
             state: {
-                change(changed) {
-                    if (changed.check) {
-                        expect(changed.check.newValue).to.be.equal(1);
-                        done();
+                lifecycle: {
+                    change(changed) {
+                        if (changed.check) {
+                            expect(changed.check.newValue).to.be.equal(1);
+                            done();
+                        }
                     }
                 }
             }
@@ -30,19 +32,28 @@ describe('Component Unit', ()=> {
                         passedProp: 0
                     }
                 },
-                'post:mount'() {
-                    this.setProps({passedProp: this.props.local.passedProp + 1}, true);
+                lifecycle: {
+                    mount() {
+                        console.log('dfgdf');
+                    },
+                    change() {
+                        return false;
+                    },
+                    post: {
+                        mount() {
+                            this.setProps({passedProp: this.props.local.passedProp + 1}, true);
+                        }
+                    }
                 },
-                change() {
-                    return false;
-                }
             },
             view: {
-                render() {
-                    const childElement = child.createTag()
-                        .refProps({check: 'passedProp'});
-                    expect(this.props.passedProp).to.be.equal(0);
-                    return childElement.render();
+                lifecycle: {
+                    render() {
+                        const childElement = child.createTag()
+                            .refProps({check: 'passedProp'});
+                        expect(this.props.passedProp).to.be.equal(0);
+                        return childElement.render();
+                    }
                 }
             }
         });
@@ -56,10 +67,14 @@ describe('Component Unit', ()=> {
             id: 'test-' + testNum + '-child',
         }, {
             state: {
-                change(changed) {
-                    if (changed.check) {
-                        expect(changed.check.newValue).to.be.equal(1);
-                        done();
+                lifecycle: {
+                    on: {
+                        change(changed) {
+                            if (changed.check) {
+                                expect(changed.check.newValue).to.be.equal(1);
+                                done();
+                            }
+                        }
                     }
                 }
             }
@@ -75,22 +90,30 @@ describe('Component Unit', ()=> {
                         }
                     }
                 },
-                'post:mount'() {
-                    let mainObj = {
-                        passedProp: this.props.local.mainObj.passedProp + 1
-                    };
-                    this.setProps({mainObj}, true);
-                },
-                change() {
-                    return false;
+                lifecycle: {
+                    post: {
+                        mount() {
+                            let mainObj = {
+                                passedProp: this.props.local.mainObj.passedProp + 1
+                            };
+                            this.setProps({mainObj}, true);
+                        }
+                    },
+                    on: {
+                        change() {
+                            return false;
+                        }
+                    }
                 }
             },
             view: {
-                render() {
-                    const childElement = child.createTag()
-                        .refProps({check: 'mainObj.passedProp'});
-                    expect(this.props.mainObj.passedProp).to.be.equal(0);
-                    return childElement.render();
+                lifecycle: {
+                    render() {
+                        const childElement = child.createTag()
+                            .refProps({check: 'mainObj.passedProp'});
+                        expect(this.props.mainObj.passedProp).to.be.equal(0);
+                        return childElement.render();
+                    }
                 }
             }
         });
@@ -104,11 +127,13 @@ describe('Component Unit', ()=> {
             id: 'test-' + testNum + '-child',
         }, {
             state: {
-                change(changed) {
-                    if (changed.checkChild1) {
-                        expect(changed.checkChild1.newValue).to.be.equal(1);
-                        expect(changed.checkChild2.newValue).to.be.equal('b');
-                        done();
+                lifecycle: {
+                    change(changed) {
+                        if (changed.checkChild1) {
+                            expect(changed.checkChild1.newValue).to.be.equal(1);
+                            expect(changed.checkChild2.newValue).to.be.equal('b');
+                            done();
+                        }
                     }
                 }
             }
@@ -117,22 +142,26 @@ describe('Component Unit', ()=> {
             id: 'test-' + testNum + '-parent',
         }, {
             state: {
-                change(changed) {
-                    if (changed.checkParent1) {
-                        expect(changed.checkParent1.newValue).to.be.equal(1);
-                        expect(changed.checkParent2.newValue).to.be.equal('b');
-                        //done();
+                lifecycle: {
+                    change(changed) {
+                        if (changed.checkParent1) {
+                            expect(changed.checkParent1.newValue).to.be.equal(1);
+                            expect(changed.checkParent2.newValue).to.be.equal('b');
+                            //done();
+                        }
                     }
                 }
             },
             view: {
-                render() {
-                    const childElement = child.createTag()
-                        .refProps({
-                            checkChild1: 'checkParent1',
-                            checkChild2: 'checkParent2'
-                        });
-                    return childElement.render();
+                lifecycle: {
+                    render() {
+                        const childElement = child.createTag()
+                            .refProps({
+                                checkChild1: 'checkParent1',
+                                checkChild2: 'checkParent2'
+                            });
+                        return childElement.render();
+                    }
                 }
             }
         });
@@ -148,29 +177,39 @@ describe('Component Unit', ()=> {
                         mainProp: 'a'
                     }
                 },
-                'post:mount'() {
-                    let mainObj = {
-                        passedProp: this.props.local.mainObj.passedProp + 1
-                    };
-                    this.setProps({
-                        mainObj,
-                        mainProp: 'b'
-                    }, true);
+                lifecycle: {
+                    on: {
+                        change() {
+                            return false;
+                        }
+                    },
+                    post: {
+                        mount() {
+                            let mainObj = {
+                                passedProp: this.props.local.mainObj.passedProp + 1
+                            };
+                            this.setProps({
+                                mainObj,
+                                mainProp: 'b'
+                            }, true);
+                        }
+                    }
                 },
-                change() {
-                    return false;
-                }
+
+
             },
             view: {
-                render() {
-                    const parentElement = parent.createTag()
-                        .refProps({
-                            checkParent1: 'mainObj.passedProp',
-                            checkParent2: 'mainProp'
-                        });
-                    expect(this.props.mainObj.passedProp).to.be.equal(0);
-                    expect(this.props.mainProp).to.be.equal('a');
-                    return parentElement.render();
+                lifecycle: {
+                    render() {
+                        const parentElement = parent.createTag()
+                            .refProps({
+                                checkParent1: 'mainObj.passedProp',
+                                checkParent2: 'mainProp'
+                            });
+                        expect(this.props.mainObj.passedProp).to.be.equal(0);
+                        expect(this.props.mainProp).to.be.equal('a');
+                        return parentElement.render();
+                    }
                 }
             }
         });
@@ -184,9 +223,11 @@ describe('Component Unit', ()=> {
             id: 'test-' + testNum + '-child',
         }, {
             state: {
-                mount() {
-                    expect(this.props.external.check).to.be.equal(1);
-                    done();
+                lifecycle: {
+                    mount() {
+                        expect(this.props.external.check).to.be.equal(1);
+                        done();
+                    }
                 }
             }
         });
@@ -194,11 +235,13 @@ describe('Component Unit', ()=> {
             id: 'test-' + testNum + '-parent',
         }, {
             view: {
-                render() {
-                    const childElement = child.createTag()
-                        .refProps({check: 'passedProp'});
-                    expect(this.props.passedProp).to.be.equal(1);
-                    return childElement.render();
+                lifecycle: {
+                    render() {
+                        const childElement = child.createTag()
+                            .refProps({check: 'passedProp'});
+                        expect(this.props.passedProp).to.be.equal(1);
+                        return childElement.render();
+                    }
                 }
             }
         });
@@ -212,8 +255,12 @@ describe('Component Unit', ()=> {
             id: 'test-' + testNum + '-child',
         }, {
             view: {
-                render() {
-                    this.methods.executeCb();
+                lifecycle: {
+                    on: {
+                        render() {
+                            this.methods.executeCb();
+                        }
+                    }
                 }
             }
         });
@@ -221,12 +268,14 @@ describe('Component Unit', ()=> {
             id: 'test-' + testNum + '-parent',
         }, {
             view: {
-                render() {
-                    const childElement = child.createTag()
-                        .methods({
-                            executeCb: done
-                        });
-                    return childElement.render();
+                lifecycle: {
+                    render() {
+                        const childElement = child.createTag()
+                            .methods({
+                                executeCb: done
+                            });
+                        return childElement.render();
+                    }
                 }
             }
         });
@@ -240,8 +289,10 @@ describe('Component Unit', ()=> {
             id: 'test-' + testNum + '-child',
         }, {
             view: {
-                render() {
-                    this.methods.executeCb();
+                lifecycle: {
+                    render() {
+                        this.methods.executeCb();
+                    }
                 }
             }
         });
@@ -258,12 +309,14 @@ describe('Component Unit', ()=> {
                 }
             },
             view: {
-                render() {
-                    const childElement = child.createTag()
-                        .refMethods({
-                            executeCb: 'executeMe'
-                        });
-                    return childElement.render();
+                lifecycle: {
+                    render() {
+                        const childElement = child.createTag()
+                            .refMethods({
+                                executeCb: 'executeMe'
+                            });
+                        return childElement.render();
+                    }
                 }
             }
         });
@@ -288,8 +341,10 @@ describe('Component Unit', ()=> {
                 }
             },
             view: {
-                render() {
-                    this.methods.executeCb();
+                lifecycle: {
+                    render() {
+                        this.methods.executeCb();
+                    }
                 }
             }
         });
@@ -307,12 +362,14 @@ describe('Component Unit', ()=> {
                 }
             },
             view: {
-                render() {
-                    const childElement = child.createTag()
-                        .refMethods({
-                            executeCb: 'executeMe'
-                        });
-                    return childElement.render();
+                lifecycle: {
+                    render() {
+                        const childElement = child.createTag()
+                            .refMethods({
+                                executeCb: 'executeMe'
+                            });
+                        return childElement.render();
+                    }
                 }
             }
         });
@@ -332,16 +389,20 @@ describe('Component Unit', ()=> {
                         prop: 1
                     }
                 },
-                mount() {
-                    this.setProps({prop: 2});
+                lifecycle: {
+                    mount() {
+                        this.setProps({prop: 2});
+                    }
                 }
             },
             view: {
-                render(changed) {
-                    if (changed && changed.prop) {
-                        console.log('123');
-                        expect(this.props.prop).to.be.equal(2);
-                        done();
+                lifecycle: {
+                    render(changed) {
+                        if (changed && changed.prop) {
+                            console.log('123');
+                            expect(this.props.prop).to.be.equal(2);
+                            done();
+                        }
                     }
                 }
             }

@@ -58,22 +58,31 @@ describe('Component Performance', ()=> {
                     }
                 }
             },
-            mount() {
-                this.setProps({
-                    number: Math.round(Math.random() * 1000),
-                    text: parseInt(Date.now() * 1000 + Math.round(Math.random() * 1000)).toString(36)
-                }, true);
+            lifecycle: {
+                on: {
+                    mount() {
+                        this.setProps({
+                            number: Math.round(Math.random() * 1000),
+                            text: parseInt(Date.now() * 1000 + Math.round(Math.random() * 1000)).toString(36)
+                        }, true);
+                    },
+                    change() {
+                        this.methods.external.changeCb();
+                    }
+                },
+                post: {
+                    mount() {
+                        this.methods.external.firstRenderCb();
+
+                    }
+                }
             },
-            'post:mount'() {
-                this.methods.external.firstRenderCb();
-            },
-            change() {
-                this.methods.external.changeCb();
-            }
         },
         view: {
-            render() {
-                return `${this.props.text} ${this.props.number} ${this.props.num}<br />`;
+            lifecycle: {
+                render() {
+                    return `${this.props.text} ${this.props.number} ${this.props.num}<br />`;
+                }
             }
         }
     });
@@ -96,26 +105,30 @@ describe('Component Performance', ()=> {
                     }
                 }
             },
-            change() {
-                return false;
+            lifecycle: {
+                change() {
+                    return false;
+                }
             }
         },
         view: {
-            render() {
-                const max = 1000;
-                let rows = [];
-                for (let i = 0; i < max; i++) {
-                    const current = row.createTag();
-                    current.id(i);
-                    if (i === max - 1) {
-                        current
-                            .refMethods({
-                                firstRenderCb: 'createDone'
-                            });
+            lifecycle: {
+                render() {
+                    const max = 1000;
+                    let rows = [];
+                    for (let i = 0; i < max; i++) {
+                        const current = row.createTag();
+                        current.id(i);
+                        if (i === max - 1) {
+                            current
+                                .refMethods({
+                                    firstRenderCb: 'createDone'
+                                });
+                        }
+                        rows.push(current.render());
                     }
-                    rows.push(current.render());
+                    return rows.join('');
                 }
-                return rows.join('');
             }
         }
     });

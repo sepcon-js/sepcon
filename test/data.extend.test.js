@@ -60,10 +60,12 @@ describe('Data Extension', ()=> {
                 }
             },
             view: {
-                render() {
-                    expect(this.props.num).to.be.equal(5);
-                    expect(this.props.txt).to.be.equal('hello');
-                    done();
+                lifecycle: {
+                    render() {
+                        expect(this.props.num).to.be.equal(5);
+                        expect(this.props.txt).to.be.equal('hello');
+                        done();
+                    }
                 }
             }
         });
