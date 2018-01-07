@@ -55,7 +55,7 @@ export default class {
                     action = target.lifecycle[hookKey][sequenceStep.action];
                 }
                 if(!action && !hook) {
-                    action = target.lifecycle[sequenceStep.action]
+                    action = target.lifecycle[sequenceStep.action];
                 }
             }
             if(action) {

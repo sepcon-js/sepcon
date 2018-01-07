@@ -62,6 +62,10 @@ export default {
         return (hook ? `${hook}:` : '') + action;
     },
 
+    buildUid() {
+        return parseInt(Date.now()*1000+Math.round(Math.random()*1000)).toString(36);
+    },
+
     formatValueForValidJSON(obj) {
         if(obj === 0) return 0;
         if(obj === undefined) return null;

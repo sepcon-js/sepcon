@@ -2,7 +2,34 @@ import Root from './root';
 import { DATA_CHANGES_AFFECTING } from './shared/constants';
 import common from './shared/utils.common';
 
+const formatShorthand = (def) => {
+    if(def && def.lifecycle) {
+        const segments = ['pre', 'on', 'post'];
+        def.lifecycle = Object.assign({
+            pre: {},
+            on: {},
+            post: {}
+        }, def.lifecycle);
+        Object.keys(def.lifecycle).forEach(key => {
+            if(segments.indexOf(key) === -1) {
+                def.lifecycle.on[key] = def.lifecycle[key];
+            }
+        });
+        Object.keys(def.lifecycle.on).forEach(key => {
+            def.lifecycle[key] = def.lifecycle.on[key];
+        });
+    }
+};
+
 function create(meta, def, type, defs, cls) {
+    switch(type) {
+        case 'component':
+            formatShorthand(def.state);
+            formatShorthand(def.view);
+            break;
+        default:
+            formatShorthand(def);
+    }
     let definition = common.clone(def);
     if(defs[meta.id]) {
         this.root.logs.print({
@@ -125,12 +152,15 @@ class SepConClass {
     createTag(id) {
         return new this.root.classes.ComponentTag(this, id);
     }
+    createUid() {
+        return common.buildUid();
+    }
 }
 
 const _sepCon = (function sepConHandler() {
     let sepCon = new SepConClass();
     sepCon.createScope = (options = {}) => {
-        options.hash = options.hash || parseInt(Date.now()*1000+Math.round(Math.random()*1000)).toString(36);
+        options.hash = options.hash || common.buildUid();
         return new SepConClass(options);
     };
     return sepCon;

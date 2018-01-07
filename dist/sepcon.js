@@ -77,9 +77,36 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
+	var formatShorthand = function formatShorthand(def) {
+	    if (def && def.lifecycle) {
+	        var segments = ['pre', 'on', 'post'];
+	        def.lifecycle = Object.assign({
+	            pre: {},
+	            on: {},
+	            post: {}
+	        }, def.lifecycle);
+	        Object.keys(def.lifecycle).forEach(function (key) {
+	            if (segments.indexOf(key) === -1) {
+	                def.lifecycle.on[key] = def.lifecycle[key];
+	            }
+	        });
+	        Object.keys(def.lifecycle.on).forEach(function (key) {
+	            def.lifecycle[key] = def.lifecycle.on[key];
+	        });
+	    }
+	};
+	
 	function create(meta, def, type, defs, cls) {
 	    var _this = this;
 	
+	    switch (type) {
+	        case 'component':
+	            formatShorthand(def.state);
+	            formatShorthand(def.view);
+	            break;
+	        default:
+	            formatShorthand(def);
+	    }
 	    var definition = _utils2.default.clone(def);
 	    if (defs[meta.id]) {
 	        this.root.logs.print({
@@ -214,6 +241,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function createTag(id) {
 	            return new this.root.classes.ComponentTag(this, id);
 	        }
+	    }, {
+	        key: 'createUid',
+	        value: function createUid() {
+	            return _utils2.default.buildUid();
+	        }
 	    }]);
 	
 	    return SepConClass;
@@ -224,7 +256,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    sepCon.createScope = function () {
 	        var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 	
-	        options.hash = parseInt(Date.now() * 1000 + Math.round(Math.random() * 1000)).toString(36);
+	        options.hash = options.hash || _utils2.default.buildUid();
 	        return new SepConClass(options);
 	    };
 	    return sepCon;
@@ -301,6 +333,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	     */
 	    hookString: function hookString(hook, action) {
 	        return (hook ? hook + ':' : '') + action;
+	    },
+	    buildUid: function buildUid() {
+	        return parseInt(Date.now() * 1000 + Math.round(Math.random() * 1000)).toString(36);
 	    },
 	    formatValueForValidJSON: function formatValueForValidJSON(obj) {
 	        if (obj === 0) return 0;
@@ -431,6 +466,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	            item = this.getComponent(sameTagList, element);
 	        }
 	        return item;
+	    },
+	    getCookie: function getCookie(key) {
+	        return document.cookie.split(';').forEach(function (cookie) {
+	            var cookiePair = cookie.split('=');
+	            if (cookiePair[0] === key) {
+	                return cookiePair[1];
+	            }
+	        });
+	    },
+	    setCookie: function setCookie(key, value) {
+	        document.cookie = key + '=' + value + ';path=/';
 	    }
 	};
 
@@ -691,9 +737,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        break;
 	                }
 	                //let target = sequenceStep.target === 'state' ? this.state.scoped : this.component.scoped;
-	                var actionHook = _utils2.default.hookString(hook, sequenceStep.action);
-	                if (target[actionHook]) {
-	                    var res = target[actionHook].apply(target, params);
+	                // const actionHook = common.hookString(hook, sequenceStep.action);
+	                var hasLifecycle = !!target.lifecycle;
+	                var action = false;
+	
+	                if (hasLifecycle) {
+	                    var hookKey = hook || 'on';
+	                    var hasHook = !!target.lifecycle[hookKey];
+	                    if (hasHook) {
+	                        action = target.lifecycle[hookKey][sequenceStep.action];
+	                    }
+	                    if (!action && !hook) {
+	                        action = target.lifecycle[sequenceStep.action];
+	                    }
+	                }
+	                if (action) {
+	                    var res = action.apply(target, params);
 	                    if (res === false) {
 	                        return false;
 	                    }
@@ -2749,6 +2808,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: true
 	});
 	
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
 	var _utils = __webpack_require__(1);
@@ -2771,18 +2832,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	        definition = Object.assign({
 	            requests: {},
-	            channels: {},
-	            cache: {
-	                request: {},
-	                channels: {}
-	            } }, definition);
+	            channels: {}
+	        }, definition);
+	        definition.cache = Object.assign({
+	            requests: {},
+	            channels: {}
+	        }, definition.cache);
 	
 	        this.definition = definition;
 	        this.id = meta.id;
 	        this.root = root;
 	        this.scoped = _utils2.default.clone(definition);
 	        this.promises = {};
-	        this.channels = [];
+	        this.subscribes = [];
+	        this.channelsLastCache = {};
 	        this.cache = {
 	            requests: {},
 	            channels: {}
@@ -2796,23 +2859,34 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	        Object.keys(this.definition.channels).forEach(function (key) {
 	            _this.scoped.channels[key] = _this.buildChannel.bind(_this, key);
+	            _this.cache.channels[key] = {};
 	        });
+	
+	        this.scoped.clearCache = function (type, key, args) {
+	            if (!_this.definition.cache[type] || !_this.definition.cache[type][key]) {
+	                return;
+	            }
+	            _this.clearCache(_this.definition.cache[type][key], type, key, args);
+	        };
 	
 	        this.api = {};
 	        this.api.requests = this.scoped.requests;
 	        this.api.channels = {};
 	        Object.keys(this.scoped.channels).forEach(function (key) {
 	            _this.api.channels[key] = function (id, callback) {
-	                var channel = _this.getValidChannels(key, id, false)[0];
+	                var channel = _this.getValidSubscribers(key, id, false)[0];
 	                if (!channel) {
 	                    channel = { id: id, callback: callback, key: key };
-	                    _this.channels.push(channel);
+	                    _this.subscribes.push(channel);
 	                } else {
 	                    channel.callback = callback;
 	                }
+	
+	                //on subscribe - will have a callback invoked if that channel was active prior to the subscribe
 	                Promise.resolve().then(function () {
-	                    if (_this.cache.channels[key] && channel.callback && typeof channel.callback === 'function') {
-	                        channel.callback(_this.cache.channels[key]);
+	                    var lastMessageFromChannel = _this.channelsLastCache[key];
+	                    if (lastMessageFromChannel && channel.callback && typeof channel.callback === 'function') {
+	                        channel.callback(lastMessageFromChannel);
 	                    }
 	                });
 	            };
@@ -2834,7 +2908,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var _this2 = this;
 	
 	            var args = [].slice.call(arguments).slice(1);
-	            var promise = this.promises[name][args.join(',')] = new Promise(function (resolve, reject) {
+	            var promise = this.promises[name][this.getArgumentsAsIndex(args)] = new Promise(function (resolve, reject) {
 	                var _args = [resolve, reject].concat(args);
 	                _this2.sequencer.startSequence('serviceRequest', [name, args, _args]);
 	            });
@@ -2847,11 +2921,36 @@ return /******/ (function(modules) { // webpackBootstrap
 	            if (cache === undefined) {
 	                this.definition.requests[name].apply(this.scoped, args);
 	                var _args = args.slice(2);
-	                this.promises[name][_args.join(',')].then(function () {
+	                this.promises[name][this.getArgumentsAsIndex(_args)].then(function () {
 	                    this.setRequestCache(name, _args, [].slice.call(arguments));
 	                }.bind(this));
 	            } else {
 	                args[0].apply(null, cache);
+	            }
+	        }
+	    }, {
+	        key: 'checkIfRequestCacheValid',
+	        value: function checkIfRequestCacheValid(key) {
+	            if (!this.definition.cache.requests[key]) {
+	                return false;
+	            }
+	            return true;
+	        }
+	    }, {
+	        key: 'getRequestCache',
+	        value: function getRequestCache(key, args) {
+	            if (this.checkIfRequestCacheValid(key)) {
+	                var config = this.definition.cache.requests[key];
+	                return this.readCache(config, 'requests', key, args);
+	            }
+	            return undefined;
+	        }
+	    }, {
+	        key: 'setRequestCache',
+	        value: function setRequestCache(key, args, value) {
+	            if (this.checkIfRequestCacheValid(key)) {
+	                var config = this.definition.cache.requests[key];
+	                this.writeCache(config, 'requests', key, args, value);
 	            }
 	        }
 	    }, {
@@ -2863,20 +2962,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'channel',
 	        value: function channel(key, args) {
-	            var channelCache = this.cache.channels[key] = this.definition.channels[key].apply(this.scoped, args);
-	            var subscribers = this.getValidChannels(key);
-	
+	            var value = this.getChannelCache(key, args); //need to slice resolve and reject arguments
+	            var subscribers = this.getValidSubscribers(key);
+	            if (value === undefined) {
+	                value = this.definition.channels[key].apply(this.scoped, args);
+	                this.setChannelCache(key, args, value);
+	            }
 	            subscribers.forEach(function (sub) {
-	                sub.callback(channelCache);
+	                sub.callback(value);
 	            });
 	        }
 	    }, {
-	        key: 'getValidChannels',
-	        value: function getValidChannels(key) {
+	        key: 'getValidSubscribers',
+	        value: function getValidSubscribers(key) {
 	            var id = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
 	            var isType = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
 	
-	            return this.channels.filter(function (channel) {
+	            return this.subscribes.filter(function (channel) {
 	                var sameKey = key === channel.key;
 	                var sameId = id ? id === channel.id : true;
 	                var isCallbackFunction = isType ? typeof channel.callback === 'function' : true;
@@ -2884,41 +2986,184 @@ return /******/ (function(modules) { // webpackBootstrap
 	            });
 	        }
 	    }, {
-	        key: 'getRequestCache',
-	        value: function getRequestCache(key, args) {
-	            if (this.checkIfRequestCacheValid(key, true)) {
-	                var stringifiedArgs = args.join(',');
-	                if (this.cache.requests[key][stringifiedArgs]) {
-	                    return this.cache.requests[key][stringifiedArgs];
+	        key: 'checkIfChannelCacheValid',
+	        value: function checkIfChannelCacheValid(key) {
+	            if (!this.definition.cache.channels[key]) {
+	                return false;
+	            }
+	            return true;
+	        }
+	    }, {
+	        key: 'getChannelCache',
+	        value: function getChannelCache(key, args) {
+	            if (this.checkIfChannelCacheValid(key)) {
+	                var config = this.definition.cache.channels[key];
+	                return this.readCache(config, 'channels', key, args);
+	            }
+	            return undefined;
+	        }
+	    }, {
+	        key: 'setChannelCache',
+	        value: function setChannelCache(key, args, value) {
+	            if (this.checkIfChannelCacheValid(key)) {
+	                var config = this.definition.cache.channels[key];
+	                this.writeCache(config, 'channels', key, args, value);
+	            }
+	            this.channelsLastCache[key] = value;
+	        }
+	    }, {
+	        key: 'writeCache',
+	        value: function writeCache(config, type, key, args, value) {
+	            var updateRecord = function updateRecord(json, args, record) {
+	                var records = json ? JSON.parse(json) : {};
+	                records[args] = record;
+	                return JSON.stringify(records);
+	            };
+	            var argsStr = this.getArgumentsAsIndex(args);
+	            var duration = config.duration || false;
+	            var storage = config.storage;
+	            var record = {
+	                value: value,
+	                ts: Date.now()
+	            };
+	            var storageKey = this.getStorageKey(type, key);
+	            var recordsJson = void 0;
+	            switch (storage) {
+	                default:
+	                case 'local':
+	                    recordsJson = localStorage.getItem(storageKey);
+	                    recordsJson = updateRecord(recordsJson, argsStr, record);
+	                    localStorage.setItem(storageKey, recordsJson);
+	                    break;
+	                case 'session':
+	                    recordsJson = sessionStorage.getItem(storageKey);
+	                    recordsJson = updateRecord(recordsJson, argsStr, record);
+	                    sessionStorage.setItem(storageKey, recordsJson);
+	                    break;
+	                case 'cookie':
+	                    recordsJson = _utils2.default.getCookie(storageKey);
+	                    recordsJson = updateRecord(recordsJson, argsStr, record);
+	                    _utils2.default.setCookie(storageKey, recordsJson);
+	                    document.cookie = storageKey + '=' + value + ';path=/';
+	                    break;
+	                case false:
+	                    this.cache[type][key][argsStr] = record;
+	                    break;
+	            }
+	        }
+	    }, {
+	        key: 'readCache',
+	        value: function readCache(config, type, key, args) {
+	            var argsStr = this.getArgumentsAsIndex(args);
+	            var minTime = config.duration ? Date.now() - parseInt(config.duration) : 0;
+	            var storageKey = this.getStorageKey(type, key);
+	            var records = void 0;
+	            var record = void 0;
+	            var recordsJson = void 0;
+	
+	            switch (config.storage) {
+	                default:
+	                case 'local':
+	                    records = JSON.parse(localStorage.getItem(storageKey));
+	                    break;
+	                case 'session':
+	                    records = JSON.parse(sessionStorage.getItem(storageKey));
+	                    break;
+	                case 'cookie':
+	                    records = JSON.parse(_utils2.default.getCookie(storageKey));
+	                    break;
+	                case false:
+	                    records = this.cache[type][key];
+	                    break;
+	            }
+	            if (!records) {
+	                return undefined;
+	            }
+	
+	            record = records[argsStr];
+	            if (!record) {
+	                return undefined;
+	            }
+	            if (record.ts > minTime) {
+	                return record.value;
+	            } else {
+	                delete records[argsStr];
+	                recordsJson = JSON.stringify(records);
+	                switch (config.storage) {
+	                    case 'local':
+	                        localStorage.setItem(storageKey, recordsJson);
+	                        break;
+	                    case 'session':
+	                        sessionStorage.setItem(storageKey, recordsJson);
+	                        break;
+	                    case 'cookie':
+	                        _utils2.default.setCookie(storageKey, recordsJson);
+	                        break;
+	                    case false:
+	                        this.cache[type][key][argsStr] = false;
+	                        break;
 	                }
 	            }
 	            return undefined;
 	        }
 	    }, {
-	        key: 'setRequestCache',
-	        value: function setRequestCache(key, args, value) {
-	            if (this.checkIfRequestCacheValid(key)) {
-	                var stringifiedArgs = args.join(',');
-	                this.cache.requests[key][stringifiedArgs] = value;
+	        key: 'clearCache',
+	        value: function clearCache(config, type, key, args) {
+	            var records = void 0;
+	            var recordsJson = void 0;
+	            var storageKey = this.getStorageKey(type, key);
+	
+	            switch (config.storage) {
+	                default:
+	                case 'local':
+	                    records = JSON.parse(localStorage.getItem(storageKey));
+	                    break;
+	                case 'session':
+	                    records = JSON.parse(sessionStorage.getItem(storageKey));
+	                    break;
+	                case 'cookie':
+	                    records = JSON.parse(_utils2.default.getCookie(storageKey));
+	                    break;
+	                case false:
+	                    records = this.cache[type][key];
+	                    break;
+	            }
+	            if (args) {
+	                var argsStr = this.getArgumentsAsIndex(args);
+	                delete records[argsStr];
+	            } else {
+	                records = {};
+	            }
+	            recordsJson = JSON.stringify(records);
+	            switch (config.storage) {
+	                case 'local':
+	                    localStorage.setItem(storageKey, recordsJson);
+	                    break;
+	                case 'session':
+	                    sessionStorage.setItem(storageKey, recordsJson);
+	                    break;
+	                case 'cookie':
+	                    _utils2.default.setCookie(storageKey, recordsJson);
+	                    break;
+	                case false:
+	                    this.cache[type][key] = records;
+	                    break;
 	            }
 	        }
 	    }, {
-	        key: 'checkIfRequestCacheValid',
-	        value: function checkIfRequestCacheValid(key, isStrict) {
-	            if (!this.definition.cache.requests[key]) {
-	                return false;
-	            }
-	            if (isStrict) {
-	                var config = this.definition.cache.requests[key];
-	                if (config.duration) {
-	                    //TODO - do stuff with duration and cleanup of cache
-	                }
-	            }
-	            return true;
+	        key: 'getStorageKey',
+	        value: function getStorageKey(type, key) {
+	            return (this.root.hash || '') + ':' + this.id + '|' + type + '|' + key;
 	        }
 	    }, {
 	        key: 'getArgumentsAsIndex',
-	        value: function getArgumentsAsIndex(args) {}
+	        value: function getArgumentsAsIndex(args) {
+	            return args.map(function (arg) {
+	                return arg && (typeof arg === 'undefined' ? 'undefined' : _typeof(arg)) === 'object' ? JSON.stringify(arg) : arg ? arg.toString() : '';
+	            }).filter(function (arg) {
+	                return !!arg;
+	            }).join(',');
+	        }
 	    }, {
 	        key: 'addRoutes',
 	        value: function addRoutes() {
